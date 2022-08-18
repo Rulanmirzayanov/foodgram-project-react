@@ -53,7 +53,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
-        verbose_name='Автор',
+        verbose_name='Автор рецепта',
         on_delete=models.CASCADE,
         related_name='recipes',
     )

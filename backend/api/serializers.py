@@ -5,8 +5,14 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
-                            ShoppingCart, Tag)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 from users.models import Subscribe
 
 User = get_user_model()
@@ -35,9 +41,11 @@ class CustomUserSerializer(UserSerializer):
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())])
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     first_name = serializers.CharField()
     last_name = serializers.CharField()
 
@@ -71,11 +79,14 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         limit = self.context['request'].query_params.get('recipe_limit')
-        if not limit:
-            recipes = obj.recipes.all()
-        else:
+        recipes = obj.recipes.all()
+        if limit:
             recipes = obj.recipes.all()[:int(limit)]
-        return SubscriptionsRecipeSerializer(recipes, many=True).data
+        return SubscriptionsRecipeSerializer(
+            recipes,
+            many=True,
+            read_only=True,
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -138,8 +149,10 @@ class IngredientRecipeCreateSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = CustomUserSerializer()
-    ingredients = IngredientRecipeListSerializer(many=True,
-                                                 source='ingredient_recipe')
+    ingredients = IngredientRecipeListSerializer(
+        many=True,
+        source='ingredient_recipe'
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -153,8 +166,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return Recipe.objects.filter(shopping_cart__user=user,
-                                     id=obj.id).exists()
+        return Recipe.objects.filter(
+            id=obj.id,
+            shopping_cart__user=user
+        ).exists()
 
     class Meta:
         model = Recipe
@@ -174,8 +189,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
-                                              many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True
+    )
     ingredients = IngredientRecipeCreateSerializer(many=True)
     image = Base64ImageField()
 
@@ -203,13 +220,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return data
 
     def _add_ingredients(self, recipe, ingredients_data):
-        for ingredient in ingredients_data:
-            ingredient_id = ingredient.get('id')
-            amount = ingredient.get('amount')
-            ingredient_id = get_object_or_404(Ingredient, id=ingredient_id)
-            IngredientRecipe.objects.create(
-                recipe=recipe, ingredient=ingredient_id, amount=amount
-            )
+        IngredientRecipe.objects.bulk_create(
+            [IngredientRecipe(
+                ingredient=ingredient['ingredient'],
+                recipe=recipe,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients_data]
+        )
 
     def get_ingredients(self, obj):
         ingredients = IngredientRecipe.objects.filter(recipe=obj)

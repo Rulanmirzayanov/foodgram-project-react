@@ -6,4 +6,4 @@ class RetrieveListViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet
 ):
-    pass
+    """Mixins"""

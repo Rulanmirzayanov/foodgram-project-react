@@ -12,10 +12,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import (
-    Favorite, Ingredient, IngredientRecipe, Recipe, ShoppingCart, Tag
+    Favorite,
+    Ingredient,
+    IngredientRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
 )
 from users.models import Subscribe, User
-
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import RetrieveListViewSet
 from .permissions import IsAuthorOrAdminOrReadOnly
@@ -186,8 +190,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
             'ingredient_amount'
         )
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = ('attachment;'
-                                           'filename="shoppinglist.csv"')
+        response['Content-Disposition'] = (
+            'attachment;'
+            'filename="shoppinglist.csv"'
+        )
         writer = csv.writer(response)
         for row in list(ingredients):
             writer.writerow(row)

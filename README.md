@@ -1,5 +1,5 @@
 # Дипломный проект — сайт Foodgram, «Продуктовый помощник».
-
+![example workflow](https://github.com/Rulanmirzayanov/foodgram-project-react/actions/workflows/maim.yml/badge.svg)
 ## Описание
 
 Онлайн-сервис и API для него. На этом сервисе пользователи 
@@ -57,7 +57,7 @@ DB_ENGINE=django.db.backends.postgresql
 DB_NAME=foodgram
 POSTGRES_USER=foodgram_user
 POSTGRES_PASSWORD=postgres
-DB_HOST=127.0.0.1
+DB_HOST=db
 DB_PORT=5432
 ```
 

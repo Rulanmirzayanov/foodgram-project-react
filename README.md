@@ -1,5 +1,5 @@
 # Дипломный проект — сайт Foodgram, «Продуктовый помощник».
-![example workflow](https://github.com/Rulanmirzayanov/foodgram-project-react/actions/workflows/maim.yml/badge.svg)
+![example workflow](https://github.com/Rulanmirzayanov/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 ## Описание
 
 Онлайн-сервис и API для него. На этом сервисе пользователи 

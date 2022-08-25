@@ -222,10 +222,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def _add_ingredients(self, recipe, ingredients_data):
         IngredientRecipe.objects.bulk_create(
             [IngredientRecipe(
-                ingredient=ingredient['ingredient'],
+                ingredient=get_object_or_404(
+                    Ingredient,
+                    id=ingredient_item.get('id')
+                ),
                 recipe=recipe,
-                amount=ingredient['amount']
-            ) for ingredient in ingredients_data]
+                amount=ingredient_item.get('amount')
+            ) for ingredient_item in ingredients_data]
         )
 
     def get_ingredients(self, obj):
@@ -262,15 +265,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
-            'ingredients',
-            'tags',
-            'image',
-            'name',
-            'text',
-            'cooking_time',
-            'author'
-        )
+        fields = '__all__'
+        read_only_fields = ('author',)
 
 
 class IngredientSerializer(serializers.ModelSerializer):

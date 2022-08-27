@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models import Count, Sum
 
 from .models import (
     Favorite,
@@ -60,13 +59,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'get_recipe', 'count_ingredients')
-
-    def get_recipe(self, obj):
-        return [f'{item["name"]} ' for item in obj.recipe.values('name')[:5]]
-
-    def count_ingredients(self, obj):
-        return (
-            obj.recipe.all().annotate(count_ingredients=Count('ingredients'))
-            .aggregate(total=Sum('count_ingredients'))['total']
-        )
+    list_display = ('id', 'user', 'recipe')
+    search_fields = ('user', 'recipe',)
+    list_filter = ('user',)
+    empty_value_display = '-пусто-'

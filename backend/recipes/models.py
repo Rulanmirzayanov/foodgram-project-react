@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 User = get_user_model()
 
@@ -167,27 +165,26 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
-    recipe = models.ManyToManyField(
+    recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
+        on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_cart_user'
+            )
+        ]
         ordering = ('id',)
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-
-    def __str__(self):
-        return f'{self.user}'
-
-    @receiver(post_save, sender=User)
-    def create_shopping_cart(sender, instance, created, **kwargs):
-        if created:
-            return ShoppingCart.objects.create(user=instance)

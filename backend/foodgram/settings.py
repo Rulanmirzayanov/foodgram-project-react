@@ -111,8 +111,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginations.LimitPageNumberPagination',
     'PAGE_SIZE': 6,
 }
 
@@ -129,3 +128,4 @@ DJOSER = {
         'user': ('rest_framework.permissions.AllowAny',),
     },
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

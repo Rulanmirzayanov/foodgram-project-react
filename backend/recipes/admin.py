@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count, Sum
 
 from .models import (
     Favorite,
@@ -27,7 +28,6 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
     search_fields = ('name',)
     list_filter = ('name',)
-    inlines = (IngredientRecipeInline,)
     empty_value_display = '-пусто-'
 
 
@@ -37,10 +37,17 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('author', 'name', 'tags')
     list_filter = ('author', 'name', 'tags')
     inlines = (IngredientRecipeInline,)
+    readonly_fields = ('favorites_count',)
     empty_value_display = '-пусто-'
 
     def favorites_count(self, obj):
-        return obj.favorites.count()
+        return Favorite.objects.filter(recipe=obj).count()
+
+
+@admin.register(IngredientRecipe)
+class IngredientRecipeAdmin(admin.ModelAdmin):
+    list_display = ('ingredient', 'recipe', 'amount')
+    list_filter = ('ingredient', 'recipe', 'amount')
 
 
 @admin.register(Favorite)
@@ -53,7 +60,13 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipe')
-    search_fields = ('user', 'recipe',)
-    list_filter = ('user',)
-    empty_value_display = '-пусто-'
+    list_display = ('user', 'get_recipe', 'count_ingredients')
+
+    def get_recipe(self, obj):
+        return [f'{item["name"]} ' for item in obj.recipe.values('name')[:5]]
+
+    def count_ingredients(self, obj):
+        return (
+            obj.recipe.all().annotate(count_ingredients=Count('ingredients'))
+            .aggregate(total=Sum('count_ingredients'))['total']
+        )

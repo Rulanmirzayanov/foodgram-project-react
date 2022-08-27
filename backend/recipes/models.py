@@ -165,26 +165,22 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User,
         verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
-    recipe = models.ForeignKey(
+    recipe = models.ManyToManyField(
         Recipe,
         verbose_name='Рецепт',
-        on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_cart_user'
-            )
-        ]
         ordering = ('id',)
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return f'{self.user}'

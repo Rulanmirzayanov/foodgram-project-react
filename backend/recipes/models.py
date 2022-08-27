@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 User = get_user_model()
 
@@ -184,3 +186,8 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f'{self.user}'
+
+    @receiver(post_save, sender=User)
+    def create_shopping_cart(self, instance, created, **kwargs):
+        if created:
+            return ShoppingCart.objects.create(user=instance)

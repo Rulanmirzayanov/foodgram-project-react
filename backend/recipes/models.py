@@ -188,6 +188,6 @@ class ShoppingCart(models.Model):
         return f'{self.user}'
 
     @receiver(post_save, sender=User)
-    def create_shopping_cart(self, instance, created, **kwargs):
+    def create_shopping_cart(sender, instance, created, **kwargs):
         if created:
             return ShoppingCart.objects.create(user=instance)

@@ -1,3 +1,7 @@
+import csv
+
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -29,7 +33,6 @@ from .serializers import (
     SubscribeSerializer,
     TagSerializer
 )
-from .utils import get_csv_shopping_cart
 
 
 class CustomUserViewSet(UserViewSet):
@@ -172,7 +175,24 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        ingredient_recipe = IngredientRecipe.objects.filter(
+        ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            ingredient_amount=Sum('amount')
+        ).values_list(
+            'ingredient__name',
+            'ingredient__measurement_unit',
+            'ingredient_amount'
         )
-        return get_csv_shopping_cart(ingredient_recipe)
+        response = HttpResponse(content_type='text/csv', charset='utf8')
+        response['Content-Disposition'] = (
+            'attachment;'
+            'filename="shoppinglist.csv"'
+        )
+        writer = csv.writer(response)
+        for row in list(ingredients):
+            writer.writerow(row)
+        return response

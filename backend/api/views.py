@@ -177,15 +177,13 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_cart__user=request.user
-        ).select_related(
-            'ingredient',
-            'recipe'
         ).values_list(
             'ingredient__name',
             'ingredient__measurement_unit',
         ).annotate(
-            ingredient_amount=Sum('amount')
+            amount=Sum('amount')
         )
+
         response = HttpResponse(content_type='text/csv', charset='utf8')
         response['Content-Disposition'] = (
             'attachment;'
